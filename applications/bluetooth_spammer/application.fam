@@ -1,0 +1,10 @@
+```fam
+App(
+    appid="bluetooth_spammer",
+    name="BT Spammer",
+    apptype=FlipperAppType.Plugin,
+    entry_point="bluetooth_spammer_app",
+    stack_size=2*1024,
+    icon="null_10px"
+)
+```
