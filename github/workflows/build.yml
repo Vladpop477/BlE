@@ -1,14 +1,41 @@
-```yaml
 name: Build Flipper App
-on: [push, workflow_dispatch]
+
+on: 
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      - uses: weirdbox/flipperzero-firmware-action@v1
-        with:
-          app: "applications/bluetooth_spammer"
-```
-
-
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup environment
+      run: |
+        sudo apt update
+        sudo apt install -y clang cmake build-essential libudev-dev libusb-1.0-0-dev
+      
+    - name: Clone Flipper Zero firmware
+      run: |
+        git clone --recursive --depth 1 https://github.com/flipperdevices/flipperzero-firmware.git
+        cd flipperzero-firmware
+        mkdir -p applications_user/bluetooth_spammer
+        
+    - name: Copy application files
+      run: |
+        cp applications/bluetooth_spammer/bluetooth_spammer.c flipperzero-firmware/applications_user/bluetooth_spammer/
+        cp applications/bluetooth_spammer/application.fam flipperzero-firmware/applications_user/bluetooth_spammer/
+      
+    - name: Build application
+      run: |
+        cd flipperzero-firmware
+        ./fbt fap_bluetooth_spammer
+      
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bluetooth_spammer
+        path: flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
